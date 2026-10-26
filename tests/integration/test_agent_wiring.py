@@ -61,7 +61,7 @@ def test_http_api_health_calendar_profile():
     from app.fast_api_app import app
 
     client = TestClient(app)
-    assert client.get("/healthz").json()["status"] == "ok"
+    assert client.get("/health").json()["status"] == "ok"
     events = client.get("/api/calendar?days=7").json()["events"]
     assert isinstance(events, list)
     profile = client.get("/api/profile").json()

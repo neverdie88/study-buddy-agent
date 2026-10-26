@@ -40,8 +40,8 @@ ROLE_TIERS: dict[str, ModelTier] = {
 }
 
 _COMPLEX_SIGNALS = re.compile(
-    r"(word problem|how many|altogether|left over|share|groups of|times|divide|why|explain|"
-    r"don't get|dont get|confused|stuck|again|still|fraction|regroup|carry|\d+\s*[+\-x×÷*/]\s*\d+)",
+    r"(word problem|how many|altogether|left over|share|groups of|divide|"
+    r"don't get|dont get|confused|stuck|still wrong|again)",
     re.IGNORECASE,
 )
 _SIMPLE_SIGNALS = re.compile(r"^(how do you spell|spell|what is|what's|is it|yes|no|ok|okay|thanks)\b", re.IGNORECASE)
@@ -68,9 +68,9 @@ def classify_request(text: str, has_image: bool) -> RoutingDecision:
         return RoutingDecision(ModelTier.REASONING, settings.reasoning_model, "image_of_homework")
     if _COMPLEX_SIGNALS.search(text):
         return RoutingDecision(ModelTier.REASONING, settings.reasoning_model, "multi_step_reasoning")
-    if _SIMPLE_SIGNALS.search(text) or len(text.split()) <= 6:
+    if _SIMPLE_SIGNALS.search(text) or len(text.split()) <= 12:
         return RoutingDecision(ModelTier.FAST, settings.fast_model, "simple_short_request")
-    return RoutingDecision(ModelTier.REASONING, settings.reasoning_model, "default_tutoring")
+    return RoutingDecision(ModelTier.FAST, settings.fast_model, "default_fast_for_low_latency_voice")
 
 
 def _latest_user_parts(llm_request: LlmRequest) -> tuple[str, bool]:

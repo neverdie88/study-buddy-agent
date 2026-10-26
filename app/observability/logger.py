@@ -90,5 +90,10 @@ def get_logger(name: str) -> logging.Logger:
 
 
 def log_event(logger: logging.Logger, event: str, level: int = logging.INFO, **fields: Any) -> None:
-    """Convenience helper to emit a structured event with arbitrary fields."""
-    logger.log(level, event, extra={"event": event, **fields})
+    """Convenience helper to emit a structured event with arbitrary fields.
+
+    Field names that collide with reserved ``LogRecord`` attributes (e.g.
+    ``args``, ``msg``) are prefixed with ``field_`` so logging never raises.
+    """
+    safe = {(f"field_{k}" if k in _RESERVED else k): v for k, v in fields.items()}
+    logger.log(level, event, extra={"event": event, **safe})

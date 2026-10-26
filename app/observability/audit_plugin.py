@@ -105,7 +105,7 @@ class ObservabilityAuditPlugin(BasePlugin):
                 "intent": _INTENT_DESCRIPTIONS.get(tool.name, f"call {tool.name}"),
                 "high_stakes": tool.name in HIGH_STAKES_TOOLS,
                 "is_confirmation_resume": tool_context.tool_confirmation is not None,
-                "args": self._scrubber.redact({k: v for k, v in tool_args.items() if k != "tool_context"}),
+                "tool_args": self._scrubber.redact({k: v for k, v in tool_args.items() if k != "tool_context"}),
             },
         )
         return None

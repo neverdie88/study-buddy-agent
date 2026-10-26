@@ -8,7 +8,7 @@ ADK ``Runner``:
 * ``POST /api/transcribe``  - server-side speech-to-text fallback (Gemini audio).
 * ``GET  /api/calendar``    - upcoming events for the side panel.
 * ``GET  /api/profile``     - what Pip remembers (parent view).
-* ``GET  /healthz``         - liveness probe.
+* ``GET  /health``          - liveness probe (``/healthz`` is reserved on Cloud Run).
 """
 
 from __future__ import annotations
@@ -165,7 +165,7 @@ async def index() -> FileResponse:
     return FileResponse(FRONTEND_DIR / "index.html")
 
 
-@api.get("/healthz")
+@api.get("/health")
 async def healthz() -> dict:
     return {"status": "ok", "fast_model": settings.fast_model, "reasoning_model": settings.reasoning_model}
 
