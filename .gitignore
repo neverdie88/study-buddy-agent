@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.data/
+.pytest_cache/
+.ruff_cache/
+eval_results.json
+.env
+*.db
+terraform/.terraform/
+terraform/*.tfstate*
+terraform/terraform.tfvars
+.DS_Store

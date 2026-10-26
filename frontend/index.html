@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pip the Study Buddy 🐰</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --pink: #ffb3d1; --pink-d: #ff7eb3; --purple: #c9b6ff; --purple-d: #9b7bff;
+    --mint: #b5f2d8; --sky: #b8e3ff; --peach: #ffd2b8; --lemon: #fff3a8;
+    --lilac: #e6cfff; --coral: #ffb0a8; --ink: #5b4a7a; --paper: #fffafc;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: "Fredoka", system-ui, sans-serif; color: var(--ink);
+    background: radial-gradient(circle at 10% 10%, #ffe3f1 0, transparent 40%),
+                radial-gradient(circle at 90% 20%, #e6f4ff 0, transparent 40%),
+                radial-gradient(circle at 50% 100%, #efe5ff 0, transparent 50%), #fff6fb;
+    min-height: 100vh;
+  }
+  .sparkle { position: fixed; pointer-events: none; font-size: 18px; opacity: .55; animation: float 6s ease-in-out infinite; }
+  @keyframes float { 0%,100% { transform: translateY(0) rotate(0) } 50% { transform: translateY(-14px) rotate(12deg) } }
+  header { display: flex; align-items: center; gap: 14px; padding: 14px 24px; }
+  header h1 { margin: 0; font-size: 28px; font-weight: 700; color: var(--pink-d); letter-spacing: .5px; }
+  header .tag { background: white; border-radius: 999px; padding: 6px 14px; font-size: 14px; box-shadow: 0 3px 0 var(--lilac); }
+  header .spacer { flex: 1; }
+  .icon-btn { border: none; background: white; border-radius: 16px; padding: 8px 14px; font: inherit; color: var(--ink);
+    cursor: pointer; box-shadow: 0 4px 0 var(--lilac); transition: transform .1s; }
+  .icon-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--lilac); }
+  main { display: grid; grid-template-columns: 380px 1fr 260px; gap: 18px; padding: 0 24px 24px; height: calc(100vh - 76px); }
+  .card { background: white; border-radius: 28px; box-shadow: 0 8px 0 rgba(201,182,255,.45), 0 10px 30px rgba(155,123,255,.12); overflow: hidden; }
+  /* ---------- Chat ---------- */
+  #chat-card { display: flex; flex-direction: column; }
+  #pip { display: flex; align-items: center; gap: 12px; padding: 14px 18px; background: linear-gradient(135deg, var(--pink), var(--lilac)); }
+  #pip-avatar { width: 74px; height: 74px; flex: none; }
+  #pip-avatar.talking .mouth { animation: talk .25s infinite alternate; transform-origin: 50px 66px; }
+  #pip-avatar .ear { transform-origin: 50px 40px; animation: wiggle 3s ease-in-out infinite; }
+  #pip-avatar.listening .ear { animation: wiggle .6s ease-in-out infinite; }
+  @keyframes talk { from { transform: scaleY(.3) } to { transform: scaleY(1.2) } }
+  @keyframes wiggle { 0%,100% { transform: rotate(0) } 50% { transform: rotate(-6deg) } }
+  #pip-status { font-weight: 600; color: white; text-shadow: 0 2px 0 rgba(155,123,255,.5); font-size: 18px; }
+  #pip-sub { color: white; font-size: 13px; opacity: .95; }
+  #messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .msg { max-width: 88%; padding: 10px 14px; border-radius: 20px; font-size: 17px; line-height: 1.35; animation: pop .25s ease-out; }
+  .msg.kid { align-self: flex-end; background: var(--sky); border-bottom-right-radius: 6px; }
+  .msg.pip { align-self: flex-start; background: #fff0f7; border: 2px solid var(--pink); border-bottom-left-radius: 6px; }
+  .msg.pip .say { font-size: 12px; cursor: pointer; opacity: .6; margin-left: 6px; }
+  .msg img { max-width: 160px; border-radius: 12px; display: block; margin-top: 6px; }
+  @keyframes pop { from { transform: scale(.85); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+  .typing span { display: inline-block; width: 8px; height: 8px; margin: 0 2px; background: var(--pink-d); border-radius: 50%; animation: bounce 1s infinite; }
+  .typing span:nth-child(2) { animation-delay: .15s } .typing span:nth-child(3) { animation-delay: .3s }
+  @keyframes bounce { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-6px) } }
+  #composer { padding: 12px; display: flex; gap: 8px; align-items: center; border-top: 2px dashed var(--lilac); }
+  #mic { width: 64px; height: 64px; border-radius: 50%; border: none; font-size: 30px; cursor: pointer; flex: none;
+    background: linear-gradient(135deg, var(--pink-d), var(--purple-d)); color: white; box-shadow: 0 5px 0 #c86aa0; }
+  #mic.on { animation: pulse 1s infinite; background: linear-gradient(135deg, #ff5f9e, #ff8fb8); }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255,126,179,.6) } 100% { box-shadow: 0 0 0 18px rgba(255,126,179,0) } }
+  #text { flex: 1; border: 2px solid var(--lilac); border-radius: 18px; padding: 12px 14px; font: inherit; font-size: 17px; color: var(--ink); outline: none; }
+  #text:focus { border-color: var(--purple-d); }
+  #send { border: none; border-radius: 18px; background: var(--mint); padding: 12px 16px; font: inherit; font-weight: 600; cursor: pointer; color: var(--ink); box-shadow: 0 4px 0 #7fd6b2; }
+  /* ---------- Whiteboard ---------- */
+  #board-card { display: flex; flex-direction: column; }
+  #board-head { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-bottom: 2px dashed var(--lilac); flex-wrap: wrap; }
+  #board-title { font-size: 22px; font-weight: 600; color: var(--purple-d); flex: 1; min-width: 200px; }
+  .swatch { width: 26px; height: 26px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 2px var(--lilac); cursor: pointer; }
+  .swatch.sel { box-shadow: 0 0 0 3px var(--purple-d); }
+  #board-wrap { position: relative; flex: 1; background:
+      linear-gradient(var(--paper), var(--paper)), repeating-linear-gradient(0deg, transparent 0 31px, #f3e8ff 31px 32px); }
+  #board-wrap::before { content: ""; position: absolute; inset: 0;
+      background: repeating-linear-gradient(0deg, transparent 0 31px, #f6ecff 31px 32px), repeating-linear-gradient(90deg, transparent 0 31px, #f6ecff 31px 32px); }
+  #board-svg, #draw-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #draw-canvas { cursor: crosshair; touch-action: none; }
+  #board-empty { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 20px; opacity: .55; pointer-events: none; text-align: center; }
+  .el-in { animation: drawIn .5s ease-out both; }
+  @keyframes drawIn { from { opacity: 0; transform: translateY(10px) scale(.95) } to { opacity: 1; transform: none } }
+  /* ---------- Side ---------- */
+  #side { display: flex; flex-direction: column; gap: 18px; overflow: hidden; }
+  #side .card { padding: 14px 16px; }
+  #side h3 { margin: 0 0 10px; font-size: 18px; color: var(--pink-d); }
+  .ev { display: flex; gap: 8px; padding: 8px 10px; border-radius: 14px; margin-bottom: 6px; font-size: 14px; background: #faf5ff; }
+  .ev .when { font-weight: 600; min-width: 76px; color: var(--purple-d); }
+  .ev.locked { background: #fff3f8; }
+  #cal-card { flex: 1; overflow-y: auto; }
+  .chip { display: inline-block; background: var(--lemon); border-radius: 999px; padding: 3px 10px; margin: 3px 3px 0 0; font-size: 13px; }
+  .chip.focus { background: var(--peach); }
+  /* ---------- Grown-up modal ---------- */
+  #modal { position: fixed; inset: 0; background: rgba(91,74,122,.35); display: none; align-items: center; justify-content: center; z-index: 10; }
+  #modal.show { display: flex; }
+  #modal .box { background: white; border-radius: 28px; padding: 24px; width: 420px; box-shadow: 0 10px 0 var(--lilac); text-align: center; }
+  #modal h2 { margin: 0 0 8px; color: var(--purple-d); }
+  #modal input { font: inherit; font-size: 20px; width: 120px; text-align: center; border: 2px solid var(--lilac); border-radius: 14px; padding: 6px; }
+  #modal .row { display: flex; gap: 10px; justify-content: center; margin-top: 16px; }
+  #modal button { font: inherit; border: none; border-radius: 16px; padding: 10px 18px; cursor: pointer; font-weight: 600; }
+  .yes { background: var(--mint); box-shadow: 0 4px 0 #7fd6b2; } .no { background: var(--coral); box-shadow: 0 4px 0 #e08a82; }
+  @media (max-width: 1100px) { main { grid-template-columns: 1fr; height: auto; } #board-wrap { min-height: 420px; } #side { display: none; } }
+</style>
+</head>
+<body>
+<div class="sparkle" style="top:8%;left:46%">✨</div><div class="sparkle" style="top:70%;left:3%;animation-delay:1s">🌸</div>
+<div class="sparkle" style="top:85%;left:60%;animation-delay:2s">⭐</div><div class="sparkle" style="top:12%;left:80%;animation-delay:3s">🌈</div>
+
+<header>
+  <h1>🐰 Pip the Study Buddy</h1>
+  <span class="tag" id="today-tag">Hello, Star! ✨</span>
+  <div class="spacer"></div>
+  <button class="icon-btn" id="voice-toggle" title="Pip talks out loud">🔊 Voice on</button>
+  <button class="icon-btn" id="new-chat" title="Start fresh">🌈 New chat</button>
+</header>
+
+<main>
+  <!-- Chat -->
+  <section class="card" id="chat-card">
+    <div id="pip">
+      <svg id="pip-avatar" viewBox="0 0 100 100" aria-label="Pip the bunny">
+        <g class="ear"><ellipse cx="36" cy="22" rx="9" ry="22" fill="#fff" stroke="#f3c6dc" stroke-width="2"/><ellipse cx="36" cy="24" rx="4.5" ry="15" fill="#ffc4dd"/></g>
+        <g class="ear" style="animation-delay:.4s"><ellipse cx="64" cy="22" rx="9" ry="22" fill="#fff" stroke="#f3c6dc" stroke-width="2"/><ellipse cx="64" cy="24" rx="4.5" ry="15" fill="#ffc4dd"/></g>
+        <circle cx="50" cy="60" r="30" fill="#fff" stroke="#f3c6dc" stroke-width="2"/>
+        <circle cx="39" cy="56" r="4.5" fill="#5b4a7a"/><circle cx="61" cy="56" r="4.5" fill="#5b4a7a"/>
+        <circle cx="40.5" cy="54.5" r="1.5" fill="#fff"/><circle cx="62.5" cy="54.5" r="1.5" fill="#fff"/>
+        <circle cx="31" cy="66" r="5" fill="#ffc4dd" opacity=".8"/><circle cx="69" cy="66" r="5" fill="#ffc4dd" opacity=".8"/>
+        <path d="M47 62 L53 62 L50 65 Z" fill="#ff8fb8"/>
+        <ellipse class="mouth" cx="50" cy="69" rx="5" ry="3" fill="#ff7eb3"/>
+        <text x="72" y="36" font-size="14">🎀</text>
+      </svg>
+      <div><div id="pip-status">Hi! I'm Pip 🐰</div><div id="pip-sub">Tap the mic and talk to me!</div></div>
+    </div>
+    <div id="messages"></div>
+    <div id="composer">
+      <button id="mic" title="Hold to talk">🎤</button>
+      <input id="text" placeholder="Type or tap the mic…" autocomplete="off" />
+      <button id="send">Send 💌</button>
+    </div>
+  </section>
+
+  <!-- Whiteboard -->
+  <section class="card" id="board-card">
+    <div id="board-head">
+      <div id="board-title">🖍️ Our Whiteboard</div>
+      <span title="Pen colour">✏️</span>
+      <div class="swatch sel" data-c="#ff7eb3" style="background:#ff7eb3"></div>
+      <div class="swatch" data-c="#9b7bff" style="background:#9b7bff"></div>
+      <div class="swatch" data-c="#3cc49a" style="background:#3cc49a"></div>
+      <div class="swatch" data-c="#4aa8ff" style="background:#4aa8ff"></div>
+      <div class="swatch" data-c="#5b4a7a" style="background:#5b4a7a"></div>
+      <button class="icon-btn" id="erase">🧽 Wipe my drawing</button>
+      <button class="icon-btn" id="send-drawing">📸 Show Pip</button>
+    </div>
+    <div id="board-wrap">
+      <svg id="board-svg" viewBox="0 0 960 600" preserveAspectRatio="xMidYMid meet"></svg>
+      <div id="board-empty"><div style="font-size:54px">🦄</div>Pip will draw here to help you learn!<br/>You can draw too ✏️</div>
+      <canvas id="draw-canvas"></canvas>
+    </div>
+  </section>
+
+  <!-- Side -->
+  <aside id="side">
+    <div class="card" id="cal-card"><h3>📅 My Week</h3><div id="cal"></div></div>
+    <div class="card" id="mem-card"><h3>💖 Pip remembers</h3><div id="mem"></div></div>
+  </aside>
+</main>
+
+<!-- Grown-up approval gate -->
+<div id="modal">
+  <div class="box">
+    <div style="font-size:42px">🧑‍🍼</div>
+    <h2>Grown-up check!</h2>
+    <p id="modal-hint"></p>
+    <p>Grown-ups only: what is <b id="gate-q"></b>?</p>
+    <input id="gate-a" inputmode="numeric" />
+    <div class="row"><button class="yes" id="approve">✅ Approve</button><button class="no" id="reject">❌ Keep it</button></div>
+    <p id="gate-err" style="color:#e05a7a;min-height:20px"></p>
+  </div>
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const state = { sessionId: localStorage.getItem("pip_session") || null, voice: true, pending: [] };
+const COLORS = { pink:"#ffb3d1", purple:"#c9b6ff", mint:"#b5f2d8", sky:"#b8e3ff", peach:"#ffd2b8", lemon:"#fff3a8", lilac:"#e6cfff", coral:"#ffb0a8" };
+const DARK = { pink:"#ff7eb3", purple:"#9b7bff", mint:"#3cc49a", sky:"#4aa8ff", peach:"#ff9a66", lemon:"#e5c400", lilac:"#b58cff", coral:"#ff6f61" };
+
+$("#today-tag").textContent = `Hello, Star! ✨ ${new Date().toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long" })}`;
+
+// ---------------------------------------------------------------- chat
+function addMsg(who, text, img) {
+  const d = document.createElement("div");
+  d.className = `msg ${who}`;
+  d.textContent = text;
+  if (img) { const i = new Image(); i.src = img; d.appendChild(i); }
+  if (who === "pip") { const s = document.createElement("span"); s.className = "say"; s.textContent = "🔊"; s.onclick = () => speak(text, true); d.appendChild(s); }
+  $("#messages").appendChild(d);
+  $("#messages").scrollTop = 1e9;
+  return d;
+}
+function typing(on) {
+  let t = $("#typing");
+  if (on && !t) { t = document.createElement("div"); t.id = "typing"; t.className = "msg pip typing"; t.innerHTML = "<span></span><span></span><span></span>"; $("#messages").appendChild(t); $("#messages").scrollTop = 1e9; }
+  if (!on && t) t.remove();
+  $("#pip-status").textContent = on ? "Pip is thinking… 💭" : "Hi! I'm Pip 🐰";
+}
+
+async function post(url, body) {
+  const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+async function sendToPip(text, image) {
+  if (!text && !image) return;
+  addMsg("kid", text || "Look at my drawing! 🎨", image);
+  typing(true);
+  try {
+    const res = await post("/api/chat", { session_id: state.sessionId, text: text || "", image_base64: image || null });
+    handleResult(res);
+  } catch (e) { typing(false); addMsg("pip", "Oops! My bunny ears got tangled. Try again? 🐰"); }
+}
+
+function handleResult(res) {
+  typing(false);
+  state.sessionId = res.session_id; localStorage.setItem("pip_session", res.session_id);
+  if (res.whiteboard) renderBoard(res.whiteboard);
+  addMsg("pip", res.reply);
+  speak(res.reply);
+  if (res.pending_confirmations && res.pending_confirmations.length) { state.pending = res.pending_confirmations; openGate(); }
+  refreshSide();
+}
+
+$("#send").onclick = () => { const t = $("#text").value.trim(); $("#text").value = ""; sendToPip(t); };
+$("#text").addEventListener("keydown", (e) => { if (e.key === "Enter") $("#send").click(); });
+$("#new-chat").onclick = () => { state.sessionId = null; localStorage.removeItem("pip_session"); $("#messages").innerHTML = ""; renderBoard(null); greet(); };
+
+// ---------------------------------------------------------------- voice out
+function cleanForSpeech(t) { return t.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu, "").replace(/[*_#`]/g, ""); }
+function pickVoice() {
+  const vs = speechSynthesis.getVoices();
+  const prefs = ["Samantha", "Karen", "Google UK English Female", "Google US English", "Microsoft Aria", "Moira", "Tessa"];
+  for (const p of prefs) { const v = vs.find((x) => x.name.includes(p)); if (v) return v; }
+  return vs.find((v) => v.lang.startsWith("en")) || null;
+}
+function speak(text, force) {
+  if ((!state.voice && !force) || !("speechSynthesis" in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(cleanForSpeech(text));
+  const v = pickVoice(); if (v) u.voice = v;
+  u.rate = 0.95; u.pitch = 1.3;
+  u.onstart = () => $("#pip-avatar").classList.add("talking");
+  u.onend = u.onerror = () => $("#pip-avatar").classList.remove("talking");
+  speechSynthesis.speak(u);
+}
+speechSynthesis && speechSynthesis.addEventListener && speechSynthesis.addEventListener("voiceschanged", pickVoice);
+$("#voice-toggle").onclick = () => { state.voice = !state.voice; $("#voice-toggle").textContent = state.voice ? "🔊 Voice on" : "🔇 Voice off"; if (!state.voice) speechSynthesis.cancel(); };
+
+// ---------------------------------------------------------------- voice in
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null, recording = false, mediaRec = null, chunks = [];
+function setListening(on) {
+  recording = on; $("#mic").classList.toggle("on", on); $("#pip-avatar").classList.toggle("listening", on);
+  $("#pip-sub").textContent = on ? "I'm listening… 👂" : "Tap the mic and talk to me!";
+}
+async function startListening() {
+  speechSynthesis.cancel();
+  if (SR) {
+    rec = new SR(); rec.lang = "en-AU"; rec.interimResults = true; rec.maxAlternatives = 1;
+    let finalText = "";
+    rec.onresult = (e) => { let interim = ""; for (const r of e.results) { if (r.isFinal) finalText = r[0].transcript; else interim += r[0].transcript; } $("#text").value = finalText || interim; };
+    rec.onend = () => { setListening(false); const t = $("#text").value.trim(); $("#text").value = ""; if (t) sendToPip(t); };
+    rec.onerror = () => setListening(false);
+    rec.start(); setListening(true);
+  } else {
+    // Fallback: record audio and transcribe server-side with Gemini.
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRec = new MediaRecorder(stream); chunks = [];
+    mediaRec.ondataavailable = (e) => chunks.push(e.data);
+    mediaRec.onstop = async () => {
+      stream.getTracks().forEach((t) => t.stop()); setListening(false);
+      const blob = new Blob(chunks, { type: mediaRec.mimeType });
+      const b64 = await new Promise((r) => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(blob); });
+      const { text } = await post("/api/transcribe", { audio_base64: b64, mime_type: (mediaRec.mimeType || "audio/webm").split(";")[0] });
+      if (text) sendToPip(text);
+    };
+    mediaRec.start(); setListening(true);
+  }
+}
+function stopListening() { if (rec) rec.stop(); if (mediaRec && mediaRec.state === "recording") mediaRec.stop(); }
+$("#mic").onclick = () => (recording ? stopListening() : startListening());
+
+// ---------------------------------------------------------------- whiteboard render
+const NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+function txt(parent, x, y, s, size = 22, fill = "#5b4a7a", weight = 600) { const t = el("text", { x, y, "font-size": size, "text-anchor": "middle", fill, "font-family": "Fredoka", "font-weight": weight }, parent); t.textContent = s; return t; }
+
+const R = {
+  text(g, e, w, h) { const size = { small: 24, medium: 34, big: 48 }[e.size || "medium"]; wrapText(g, e.text, w / 2, h / 2, w - 20, size, DARK[e.color] || "#5b4a7a"); },
+  equation(g, e, w, h) {
+    el("rect", { x: 10, y: h / 2 - 50, width: w - 20, height: 100, rx: 26, fill: COLORS[e.color] || COLORS.lemon }, g);
+    const parts = e.expression.split("?");
+    const t = el("text", { x: w / 2, y: h / 2 + 18, "font-size": 52, "text-anchor": "middle", fill: "#5b4a7a", "font-family": "Fredoka", "font-weight": 700 }, g);
+    parts.forEach((p, i) => { const s = el("tspan", {}, t); s.textContent = p; if (i < parts.length - 1) { const q = el("tspan", { fill: "#ff7eb3" }, t); q.textContent = "❓"; } });
+  },
+  fraction_shape(g, e, w, h) {
+    const fill = DARK[e.color] || DARK.pink, light = "#fff";
+    if ((e.shape || "pizza") === "pizza") {
+      const r = Math.min(w, h) / 2 - 30, cx = w / 2, cy = h / 2 - 10;
+      if (e.parts === 1) el("circle", { cx, cy, r, fill: e.shaded ? fill : light, stroke: "#5b4a7a", "stroke-width": 4 }, g);
+      else for (let i = 0; i < e.parts; i++) {
+        const a0 = (i / e.parts) * 2 * Math.PI - Math.PI / 2, a1 = ((i + 1) / e.parts) * 2 * Math.PI - Math.PI / 2;
+        const large = a1 - a0 > Math.PI ? 1 : 0;
+        el("path", { d: `M${cx},${cy} L${cx + r * Math.cos(a0)},${cy + r * Math.sin(a0)} A${r},${r} 0 ${large} 1 ${cx + r * Math.cos(a1)},${cy + r * Math.sin(a1)} Z`,
+          fill: i < e.shaded ? fill : light, stroke: "#5b4a7a", "stroke-width": 4, "stroke-linejoin": "round" }, g);
+      }
+      txt(g, w / 2, h - 8, `${e.shaded}/${e.parts}`, 30, "#5b4a7a", 700);
+    } else {
+      const bw = w - 40, bh = 70, x0 = 20, y0 = h / 2 - bh / 2 - 10, pw = bw / e.parts;
+      for (let i = 0; i < e.parts; i++) el("rect", { x: x0 + i * pw, y: y0, width: pw, height: bh, fill: i < e.shaded ? fill : light, stroke: "#5b4a7a", "stroke-width": 4, rx: 6 }, g);
+      txt(g, w / 2, y0 + bh + 44, `${e.shaded}/${e.parts}`, 30, "#5b4a7a", 700);
+    }
+  },
+  number_line(g, e, w, h) {
+    const x0 = 30, x1 = w - 30, y = h / 2 + 10, n = Math.round((e.end - e.start) / (e.step || 1));
+    const X = (v) => x0 + ((v - e.start) / (e.end - e.start)) * (x1 - x0);
+    el("line", { x1: x0 - 10, y1: y, x2: x1 + 10, y2: y, stroke: "#5b4a7a", "stroke-width": 5, "stroke-linecap": "round" }, g);
+    for (let i = 0; i <= n; i++) {
+      const v = e.start + i * (e.step || 1), x = X(v), hl = (e.highlight || []).includes(v);
+      el("line", { x1: x, y1: y - 12, x2: x, y2: y + 12, stroke: "#5b4a7a", "stroke-width": 4 }, g);
+      if (hl) el("circle", { cx: x, cy: y, r: 13, fill: DARK[e.color] || DARK.pink }, g);
+      const label = e.fraction_denominator ? (v === 0 ? "0" : v === e.fraction_denominator ? "1" : `${v}/${e.fraction_denominator}`) : String(v);
+      txt(g, x, y + 44, label, n > 15 ? 16 : 22, hl ? (DARK[e.color] || DARK.pink) : "#5b4a7a");
+    }
+    (e.jumps || []).forEach(([a, b], i) => {
+      const xa = X(a), xb = X(b), mid = (xa + xb) / 2, hgt = Math.min(90, Math.abs(xb - xa) / 1.6 + 20);
+      el("path", { d: `M${xa},${y - 10} Q${mid},${y - hgt - 20} ${xb},${y - 10}`, fill: "none", stroke: DARK.purple, "stroke-width": 4, "stroke-dasharray": "8 6" }, g);
+      txt(g, mid, y - hgt / 2 - 22, "🐰", 26);
+    });
+  },
+  counting_objects(g, e, w, h) {
+    const groups = e.groups || 1, per = Math.ceil(e.count / groups), size = Math.min(44, (w - 20) / Math.max(5, Math.ceil(Math.sqrt(e.count)) * 1.5));
+    const gw = (w - 20) / groups; let idx = 0;
+    for (let gi = 0; gi < groups; gi++) {
+      const cols = Math.ceil(Math.sqrt(per)), rows = Math.ceil(per / cols);
+      if (groups > 1) el("rect", { x: 10 + gi * gw + 6, y: h / 2 - rows * size / 2 - 22, width: gw - 12, height: rows * size + 34, rx: 22, fill: COLORS[e.color] || COLORS.lilac, opacity: .55 }, g);
+      for (let k = 0; k < per && idx < e.count; k++, idx++) {
+        const cx = 10 + gi * gw + gw / 2 + ((k % cols) - (cols - 1) / 2) * size, cy = h / 2 - rows * size / 2 + Math.floor(k / cols) * size + size / 2 - 6;
+        txt(g, cx, cy + size / 3, e.sticker || "⭐", size * .85, "#000", 400);
+        if (idx >= e.count - (e.crossed_out || 0)) el("path", { d: `M${cx - size / 2.4},${cy - size / 2.4} L${cx + size / 2.4},${cy + size / 2.4}`, stroke: "#ff5f7e", "stroke-width": 5, "stroke-linecap": "round" }, g);
+      }
+    }
+  },
+  base_ten_blocks(g, e, w, h) {
+    const unit = Math.min(18, (h - 60) / 10), y0 = h / 2 - unit * 5 - 10;
+    for (let i = 0; i < e.tens; i++) for (let j = 0; j < 10; j++) el("rect", { x: 20 + i * (unit + 8), y: y0 + j * unit, width: unit, height: unit, fill: COLORS.sky, stroke: "#4aa8ff", "stroke-width": 2 }, g);
+    const ox = 20 + e.tens * (unit + 8) + 22;
+    for (let k = 0; k < e.ones; k++) el("rect", { x: ox + (k % 5) * (unit + 4), y: y0 + Math.floor(k / 5) * (unit + 4), width: unit, height: unit, rx: 3, fill: k >= 10 ? COLORS.coral : COLORS.pink, stroke: DARK.pink, "stroke-width": 2 }, g);
+    txt(g, w / 2, h - 10, `${e.tens} tens + ${e.ones} ones`, 22);
+  },
+  steps(g, e, w, h) {
+    const n = e.items.length;
+    if (e.cycle) {
+      const cx = w / 2, cy = h / 2, r = Math.min(w, h) / 2 - 60;
+      e.items.forEach((it, i) => {
+        const a = (i / n) * 2 * Math.PI - Math.PI / 2, x = cx + r * Math.cos(a), y = cy + r * Math.sin(a);
+        const a2 = ((i + 0.5) / n) * 2 * Math.PI - Math.PI / 2;
+        txt(g, cx + (r * .95) * Math.cos(a2), cy + (r * .95) * Math.sin(a2) + 8, "➜", 26, DARK.purple).setAttribute("transform", `rotate(${(a2 * 180 / Math.PI) + 90} ${cx + (r * .95) * Math.cos(a2)} ${cy + (r * .95) * Math.sin(a2)})`);
+        el("circle", { cx: x, cy: y, r: 42, fill: Object.values(COLORS)[i % 8] }, g);
+        txt(g, x, y + 10, (e.stickers || [])[i] || `${i + 1}`, 34, "#5b4a7a", 400);
+        txt(g, x, y + 66, it, 18);
+      });
+    } else {
+      const bh = Math.min(64, (h - 20) / n - 10);
+      e.items.forEach((it, i) => {
+        const y = 10 + i * (bh + 10);
+        el("rect", { x: 10, y, width: w - 20, height: bh, rx: 18, fill: Object.values(COLORS)[i % 8] }, g);
+        const t = el("text", { x: 30, y: y + bh / 2 + 8, "font-size": 22, fill: "#5b4a7a", "font-family": "Fredoka", "font-weight": 600 }, g);
+        t.textContent = `${(e.stickers || [])[i] || (i + 1) + "."}  ${it}`;
+      });
+    }
+  },
+  sticker(g, e, w, h) { txt(g, w / 2, h / 2 + 30, e.sticker, { small: 50, medium: 80, big: 120 }[e.size || "big"], "#000", 400); },
+};
+function wrapText(g, s, x, y, maxW, size, fill) {
+  const words = s.split(" "), lines = []; let line = "";
+  const maxChars = Math.max(6, Math.floor(maxW / (size * .55)));
+  for (const wd of words) { if ((line + " " + wd).trim().length > maxChars) { lines.push(line.trim()); line = wd; } else line += " " + wd; }
+  lines.push(line.trim());
+  lines.forEach((l, i) => txt(g, x, y + (i - (lines.length - 1) / 2) * size * 1.15 + size / 3, l, size, fill));
+}
+function layout(n) { if (n <= 1) return [1, 1]; if (n === 2) return [2, 1]; if (n <= 4) return [2, 2]; if (n <= 6) return [3, 2]; return [4, 2]; }
+function renderBoard(scene) {
+  const svg = $("#board-svg"); svg.innerHTML = "";
+  const has = scene && scene.elements && scene.elements.length;
+  $("#board-empty").style.display = has ? "none" : "flex";
+  $("#board-title").textContent = has ? `🖍️ ${scene.title}` : "🖍️ Our Whiteboard";
+  if (!has) return;
+  const [cols, rows] = layout(scene.elements.length), W = 960, H = 600, cw = W / cols, ch = H / rows;
+  scene.elements.forEach((e, i) => {
+    const g = el("g", { transform: `translate(${(i % cols) * cw + 10},${Math.floor(i / cols) * ch + 10})`, class: "el-in", style: `animation-delay:${i * .25}s` }, svg);
+    const w = cw - 20, h = ch - 20 - (e.label ? 30 : 0);
+    try { (R[e.type] || R.text)(g, e, w, h); } catch (err) { console.warn(err); }
+    if (e.label) txt(g, w / 2, h + 22, e.label, 20, DARK[e.color] || "#9b7bff");
+  });
+}
+
+// ---------------------------------------------------------------- kid drawing layer
+const cv = $("#draw-canvas"), ctx = cv.getContext("2d"); let pen = "#ff7eb3", drawing = false, drew = false;
+function fit() { const r = cv.getBoundingClientRect(); const img = drew ? ctx.getImageData(0, 0, cv.width, cv.height) : null; cv.width = r.width; cv.height = r.height; if (img) ctx.putImageData(img, 0, 0); }
+new ResizeObserver(fit).observe($("#board-wrap"));
+cv.addEventListener("pointerdown", (e) => { drawing = true; drew = true; $("#board-empty").style.display = "none"; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
+cv.addEventListener("pointermove", (e) => { if (!drawing) return; ctx.strokeStyle = pen; ctx.lineWidth = 6; ctx.lineCap = ctx.lineJoin = "round"; ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); });
+["pointerup", "pointerleave"].forEach((ev) => cv.addEventListener(ev, () => (drawing = false)));
+document.querySelectorAll(".swatch").forEach((s) => (s.onclick = () => { document.querySelectorAll(".swatch").forEach((x) => x.classList.remove("sel")); s.classList.add("sel"); pen = s.dataset.c; }));
+$("#erase").onclick = () => { ctx.clearRect(0, 0, cv.width, cv.height); drew = false; };
+$("#send-drawing").onclick = async () => {
+  // Composite Pip's SVG drawing + the kid's strokes into one PNG.
+  const out = document.createElement("canvas"); out.width = cv.width; out.height = cv.height; const o = out.getContext("2d");
+  o.fillStyle = "#fffafc"; o.fillRect(0, 0, out.width, out.height);
+  const svgData = new XMLSerializer().serializeToString($("#board-svg"));
+  const img = new Image(); img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgData);
+  await new Promise((r) => { img.onload = r; img.onerror = r; });
+  try { o.drawImage(img, 0, 0, out.width, out.height); } catch (_) {}
+  o.drawImage(cv, 0, 0);
+  const text = $("#text").value.trim(); $("#text").value = "";
+  sendToPip(text || "I drew my answer on the whiteboard. Can you check my thinking?", out.toDataURL("image/png"));
+};
+
+// ---------------------------------------------------------------- grown-up gate (HITL)
+let gateAnswer = 0;
+function openGate() {
+  const p = state.pending[0]; if (!p) return;
+  const a = 6 + Math.floor(Math.random() * 4), b = 6 + Math.floor(Math.random() * 4); gateAnswer = a * b;
+  $("#gate-q").textContent = `${a} × ${b}`; $("#gate-a").value = ""; $("#gate-err").textContent = "";
+  $("#modal-hint").textContent = p.hint; $("#modal").classList.add("show");
+}
+async function decide(confirmed) {
+  if (confirmed && Number($("#gate-a").value) !== gateAnswer) { $("#gate-err").textContent = "Hmm, that's not right. Ask a grown-up! 🙂"; return; }
+  const p = state.pending.shift(); $("#modal").classList.remove("show"); typing(true);
+  try { handleResult(await post("/api/confirm", { session_id: state.sessionId, confirmation_call_id: p.confirmation_call_id, confirmed })); }
+  catch (e) { typing(false); addMsg("pip", "Oops, something went wrong. 🐰"); }
+}
+$("#approve").onclick = () => decide(true);
+$("#reject").onclick = () => decide(false);
+
+// ---------------------------------------------------------------- side panels
+async function refreshSide() {
+  try {
+    const { events } = await (await fetch("/api/calendar?days=7")).json();
+    $("#cal").innerHTML = events.length ? "" : "<i>No plans yet! 🌈</i>";
+    events.forEach((e) => {
+      const d = new Date(e.start_time), div = document.createElement("div");
+      div.className = "ev" + (e.parent_locked ? " locked" : "");
+      div.innerHTML = `<div class="when">${d.toLocaleDateString("en-AU", { weekday: "short" })} ${e.start_time.slice(11, 16)}</div><div></div>`;
+      div.lastChild.textContent = e.title + (e.parent_locked ? " 🔒" : ""); $("#cal").appendChild(div);
+    });
+    const p = await (await fetch("/api/profile")).json();
+    $("#mem").innerHTML = `<div style="font-size:14px">Learns best: <b>${(p.preferred_style || "unknown").replace("_", " ")}</b></div>`;
+    const box = document.createElement("div");
+    (p.interests || []).forEach((i) => { const c = document.createElement("span"); c.className = "chip"; c.textContent = i; box.appendChild(c); });
+    (p.focus_areas || []).forEach((i) => { const c = document.createElement("span"); c.className = "chip focus"; c.textContent = "🎯 " + i; box.appendChild(c); });
+    (p.strengths || []).forEach((i) => { const c = document.createElement("span"); c.className = "chip"; c.style.background = "#b5f2d8"; c.textContent = "⭐ " + i; box.appendChild(c); });
+    $("#mem").appendChild(box);
+  } catch (_) {}
+}
+function greet() { addMsg("pip", "Hi Star! I'm Pip, your study buddy bunny! 🐰 We can do homework together, or check your calendar. What would you like to do?"); }
+greet(); refreshSide();
+</script>
+</body>
+</html>
