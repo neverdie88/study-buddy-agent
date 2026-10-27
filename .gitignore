@@ -11,3 +11,7 @@ terraform/.terraform/
 terraform/*.tfstate*
 terraform/terraform.tfvars
 .DS_Store
+*.mp4
+*.pem
+*credentials*.json
+*service-account*.json

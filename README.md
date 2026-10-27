@@ -1,5 +1,7 @@
 # 🐰 Pip the Study Buddy
 
+> **Disclaimer:** This is not an officially supported Google product. This project is a personal experimental and educational showcase and is not eligible for the [Google Open Source Software Vulnerability Rewards Program](https://bughunters.google.com/open-source-security).
+
 **An AI study buddy for an 8‑year‑old that talks, listens and draws on a whiteboard.** It is built with Google's **Agent Development Kit (ADK)** and **Gemini on Vertex AI**.
 
 Pip helps a Year 3 student:
@@ -108,3 +110,11 @@ export GOOGLE_CLOUD_PROJECT=your-project
 - Only a nickname is stored, never a real name. PII is scrubbed before it reaches the model, the logs or memory.
 - Removing or overriding calendar events always needs a grown-up's approval.
 - Unsafe or distress messages get a kind, fixed reply that points her to a trusted adult.
+
+## Contributing
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for guidelines on contributing to this project.
+
+## License
+
+Copyright 2026 Google LLC. Licensed under the [Apache License, Version 2.0](LICENSE).
